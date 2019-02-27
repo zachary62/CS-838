@@ -5,9 +5,9 @@ import ml
 class candidate:
     def __init__(self, text, position, feature1, feature2):
         self.text = text
-        # position is a array of int
-        # for example "Elon Musk" in "Elon Musk has three wives" will have position [0,1]
-        # for example "wives" in "Elon Musk has three wives" will have position [4]
+        # position is an int >=0 if self.text is a valid name else it is -1
+        # for example "Elon Musk" in "Elon Musk has three wives" will have position [0]
+        # for example "wives" in "Elon Musk has three wives" will have position [-1]
         self.label = position
 
         # TODO: define a set of features (e.g. how many substring there are, whether initial capital...)
@@ -21,7 +21,7 @@ def readfile():
   texts = []
   labels = []
   # read files from I
-  for i in range(1, 2):
+  for i in range(1, 60):
     file = str(i).zfill(3)
     f = open("../I/" + file + "l.txt", "r", encoding='utf-8-sig')
     print("../I/" + file + "l.txt")
@@ -30,7 +30,7 @@ def readfile():
     # label is the position of name
     # for example, "Elon Musk has three wives"
     # text will be [Elon, Musk, has, three, wives]
-    # label will be [0,1] because text[0] = Elon and text[1] = Musk are both names
+    # label will be [0,1,-1,-1,-1] because text[0] = Elon and text[1] = Musk are both names
     text = []
     label = []
     for x in f:
@@ -49,7 +49,7 @@ def readfile():
 
   return texts,labels
 
-# TODO: return all candidates of given text
+# return all candidates of given text
 # for example, "Elon Musk has three wives"
 # return features of  "Elon, Musk, has, three, wives,
 # Elon Musk, Musk has, has three, three wives,
@@ -100,7 +100,9 @@ def generatecandiates(texts, labels):
         else:
           label = labels[k][i]
       else:
-        label = -1 #includes cases like Musk has or said Elon where one of the word is not a name and cases like has three where none of the word is a name
+        # includes cases like 'Musk has three' or 'said Elon Musk' where one of the word is not a name 
+        # and cases like 'has three wives' where none of the word is a name
+        label = -1 
 
       candidates.append(candidate(text, label, 1, 1))
 
@@ -110,10 +112,62 @@ def generatecandiates(texts, labels):
 
 # TODO: preprocess all candidates (e.g. pruning rules)
 def preprocess(candidates):
-  candidates = []
-  candidates.append(candidate([0],1,1))
-  candidates.append(candidate([0],1,1))
-  return candidates
+
+  # PRUNING RULE 1: check if every word of candidate's text start with capital letter or not
+  # for example: 'Elon Musk' is a valid name but 'Musk has' is an obvious negative
+  # since 'has' starts with a small letter.
+  prunedCandidatesStage1 = []
+  for i in range(0, len(candidates)):
+    words = []
+    text = candidates[i].text
+    words.extend(re.findall(r'\S+', text))
+    flag = 0
+    for idx, val in enumerate(words):
+      if val[0].isalpha() == False or val[0].isupper() == False:
+        flag = 1
+        break
+    if flag == 1:
+      continue
+    prunedCandidatesStage1.append(candidates[i]);
+
+  # PRUNING RULE 2: Remove single word salutation candidates like Mr, Ms, Mrs and Dr
+  salut = ["Mr", "Ms", "Mrs", "Dr"]
+  prunedCandidatesStage2 = []
+  for i in range(0, len(prunedCandidatesStage1)):
+    flag = 0
+    for j in range(0, len(salut)):
+      if(prunedCandidatesStage1[i].text == salut[j]):
+        flag = 1
+        break
+    if flag == 1:
+      continue
+    prunedCandidatesStage2.append(prunedCandidatesStage1[i]);
+
+  # PRUNING RULE 3: Remove candidates that have prepositions and third person indirect references in them
+  # Note : More can be discovered later, the following were occuring the most in the first 60 files
+  prunedCandidatesStage3 = []
+  prep = ["The", "To", "I", "In", "On", "His", "Her", "He", "She", "They", "With", "It", "But", "As", "A", "This", "We"]
+  for i in range(0, len(prunedCandidatesStage2)):
+    words = []
+    text = prunedCandidatesStage2[i].text
+    words.extend(re.findall(r'\S+', text))
+    flag = 0
+    for idx, val in enumerate(words):
+      for j in range(0, len(prep)):
+        if val == prep[j]:
+          flag = 1
+          break
+      if flag == 1:
+        break
+    if flag == 1:
+        continue
+    prunedCandidatesStage3.append(prunedCandidatesStage2[i]);
+
+  return prunedCandidatesStage3
+
+# TODO: generate features for candidates left after pre-processing
+def generateFeatures(candidates):
+  return 0
 
 # TODO: postprocess all candidates
 def postprocess(candidates):
@@ -129,9 +183,19 @@ def main():
   #print(texts)
   #print(labels)
   candidates = generatecandiates(texts, labels)
+  #f = open("candidatesGenerated.txt", "w")
   #for i in range(0,len(candidates)):
-  #  print('{} {}'.format(candidates[i].text, candidates[i].label))
+    #f.write('{} {}\n'.format(candidates[i].text, candidates[i].label))
+
   candidates = preprocess(candidates)
+  #f = open("candidatesPruned.txt", "w")
+  count = 0
+  for i in range(0,len(candidates)):
+    #f.write('{} {}\n'.format(candidates[i].text, candidates[i].label))
+    if candidates[i].label != -1:
+      count += 1
+  print(count); #count of candidates that are valid names
+  candidates = generateFeatures(candidates)
   candidates = ml.traindata(candidates,labels)
   candidates = postprocess(candidates)
   evaluate(candidates)
