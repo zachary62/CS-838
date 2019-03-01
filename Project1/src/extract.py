@@ -3,12 +3,17 @@ import ml
 
 # candidate of all sub strings
 class candidate:
-    def __init__(self, text, position, feature1, feature2):
+    def __init__(self, text, position, label, feature1, feature2):
         self.text = text
-        # position is an int >=0 if self.text is a valid name else it is -1
-        # for example "Elon Musk" in "Elon Musk has three wives" will have position [0]
-        # for example "wives" in "Elon Musk has three wives" will have position [-1]
-        self.label = position
+        # position is a tuple of length 3 whose first element tells the file number in which the candidate is present
+        # second element tells the location of first word of the candidate and third element tells the no of words in the candidate
+        # for example "Elon Musk" in "Elon Musk has three wives" will have position [1,0,2]
+        # for example "wives" in "Elon Musk has three wives" will have position [1,4,1]
+        self.position = position
+        # label is 1 if self.text is a valid name else it is -1
+        # for example "Elon Musk" in "Elon Musk has three wives" will have label 1
+        # for example "wives" in "Elon Musk has three wives" will have label -1
+        self.label = label
 
         # TODO: define a set of features (e.g. how many substring there are, whether initial capital...)
         self.features1 = feature1
@@ -20,6 +25,7 @@ def readfile():
   # texts of all files
   texts = []
   labels = []
+  positions = []
   # read files from I
   for i in range(1, 60):
     file = str(i).zfill(3)
@@ -30,15 +36,18 @@ def readfile():
     # label is the position of name
     # for example, "Elon Musk has three wives"
     # text will be [Elon, Musk, has, three, wives]
-    # label will be [0,1,-1,-1,-1] because text[0] = Elon and text[1] = Musk are both names
+    # label will be [1,1,-1,-1,-1] because text[0] = Elon and text[1] = Musk are both names
+    # position will be [0,1,2,3,4] 
     text = []
     label = []
+    position = []
     for x in f:
       text.extend(re.findall(r'\S+', x))
 
     for idx, val in enumerate(text):
+      position.append(idx)
       if val.startswith("<name>") and val.endswith("</name>"):
-        label.append(idx)
+        label.append(1)
         # delete <name> tag
         text[idx] = text[idx][6:len(text[idx])-7]
       else:
@@ -46,28 +55,37 @@ def readfile():
 
     texts.append(text)
     labels.append(label)
+    positions.append(position)
 
-  return texts,labels
+  return texts,labels,positions
 
 # return all candidates of given text
 # for example, "Elon Musk has three wives"
 # return features of  "Elon, Musk, has, three, wives,
 # Elon Musk, Musk has, has three, three wives,
 # Elon Musk has, Musk has three, has three wives"
-def generatecandiates(texts, labels):
+def generatecandiates(texts, labels, positions):
   candidates = []
 
   #k refers to different files in I
   #generate candidates of length 1
   for k in range(0,len(texts)):
     for i in range(0,len(texts[k])):
+      pos = []
+      pos.append(k+1)
+      pos.append(positions[k][i])
+      pos.append(1)
       text = texts[k][i]
-      candidates.append(candidate(text, labels[k][i], 1, 1))
+      candidates.append(candidate(text, pos, labels[k][i], 1, 1))
 
   #generate candidates of length 2
   for k in range(0,len(texts)):
     for i in range(0,len(texts[k]) - 1):
       text = texts[k][i] + " " + texts[k][i+1]
+      pos = []
+      pos.append(k+1)
+      pos.append(positions[k][i])
+      pos.append(2)
 
       if labels[k][i] != -1 and labels[k][i+1] != -1:
         #this is a probable candidate name of length 2 words
@@ -82,12 +100,16 @@ def generatecandiates(texts, labels):
       else:
         label = -1 #includes cases like "Musk has" or "said Elon" where one of the word is not a name and cases like "has three" where none of the word is a name
 
-      candidates.append(candidate(text, label, 1, 1))
+      candidates.append(candidate(text, pos, label, 1, 1))
 
   #generate candidates of length 3
   for k in range(0,len(texts)):
     for i in range(0,len(texts[k]) - 2):
       text = texts[k][i] + " " + texts[k][i+1] + " " + texts[k][i+2]
+      pos = []
+      pos.append(k+1)
+      pos.append(positions[k][i])
+      pos.append(3)
 
       if labels[k][i] != -1 and labels[k][i+1] != -1 and labels[k][i+2] != -1:
         #this is a probable candidate name of length 3 words
@@ -104,7 +126,7 @@ def generatecandiates(texts, labels):
         # and cases like 'has three wives' where none of the word is a name
         label = -1 
 
-      candidates.append(candidate(text, label, 1, 1))
+      candidates.append(candidate(text, pos, label, 1, 1))
 
   #candidates.append(candidate([0],1,1))
   #candidates.append(candidate([0],1,1))
@@ -179,19 +201,19 @@ def evaluate(candidates):
 
 def main():
   # read files from I
-  texts,labels = readfile()
+  texts,labels,positions = readfile()
   #print(texts)
   #print(labels)
-  candidates = generatecandiates(texts, labels)
-  #f = open("candidatesGenerated.txt", "w")
-  #for i in range(0,len(candidates)):
-    #f.write('{} {}\n'.format(candidates[i].text, candidates[i].label))
+  candidates = generatecandiates(texts, labels,positions)
+  f = open("candidatesGenerated.txt", "w")
+  for i in range(0,len(candidates)):
+    f.write('{} {} {}\n'.format(candidates[i].text, candidates[i].position, candidates[i].label))
 
   candidates = preprocess(candidates)
-  #f = open("candidatesPruned.txt", "w")
+  f = open("candidatesPruned.txt", "w")
   count = 0
   for i in range(0,len(candidates)):
-    #f.write('{} {}\n'.format(candidates[i].text, candidates[i].label))
+    f.write('{} {} {}\n'.format(candidates[i].text, candidates[i].position, candidates[i].label))
     if candidates[i].label != -1:
       count += 1
   print(count); #count of candidates that are valid names
