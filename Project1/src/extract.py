@@ -1,9 +1,14 @@
 import re
 import ml
 
+# startfile  =  2
+# endfile = 3
+startfile  =  1
+endfile = 200
+
 # candidate of all sub strings
 class candidate:
-    def __init__(self, text, position, label, feature1, feature2):
+    def __init__(self, text, position, label, length, disTosalution, disTospeak, punctuation, disTitle, disJob):
         self.text = text
         # position is a tuple of length 3 whose first element tells the file number in which the candidate is present
         # second element tells the location of first word of the candidate and third element tells the no of words in the candidate
@@ -14,10 +19,49 @@ class candidate:
         # for example "Elon Musk" in "Elon Musk has three wives" will have label 1
         # for example "wives" in "Elon Musk has three wives" will have label -1
         self.label = label
-
-        # TODO: define a set of features (e.g. how many substring there are, whether initial capital...)
-        self.features1 = feature1
-        self.features2 = feature2
+        # The first feature is the total length of string
+        # for example "Mr Elon Musk has Three Wives"
+        # "Mr" : 2
+        # "Mr Elon" : 7
+        self.length = length
+        # The distance to salutions including ["Mr", "Ms", "Mrs", "Dr", "Miss", "Mx", "Sir"]
+        # distance is at most 5. Otherwise, distance is 999
+        # if the candidate text contain one of these titles, distance is zero
+        # for example "Mr Elon Musk has Three Wives, bla bla bla bla bla Time"
+        # "Mr Elon Musk" : 0
+        # "Elon Musk" : 1
+        # "Three" : 4
+        # "Time" : 999
+        self.disTosalution = disTosalution
+        # The distance to speak actions including ["say","says","said","tell","tells","told","asks","asked","speak","speaks","spoken"]
+        # distance is at most 5. Otherwise, distance is 999
+        # if the candidate text contain one of these titles, distance is zero
+        # for example "Mr Elon Musk speaks to his Three Wives, bla bla bla bla bla Time"
+        # "Mr Elon Musk" : 1
+        # "Elon Musk" : 1
+        # "Three" : 3
+        # "Time" : 999
+        self.disTospeak = disTospeak
+        # Whether there is a punctuation in the middle and at the end of substring
+        # true = 1 and false = -1
+        # for example "Elon Musk, Alex Fust speak to their wives"
+        # "Elon Musk," : -1
+        # "Musk, Alex" : 1
+        # "Musk, Alex Fust" : 1
+        self.punctuation = punctuation
+        # The distance to titles = ["Chairman", "Executive", "President", "Minister"]
+        # distance is at most 5. Otherwise, distance is 999
+        # for example "Chairman Mr Elon Musk speaks to his Three Wives"
+        # "Mr Elon Musk" : 1
+        # "Elon Musk" : 2
+        self.disTitle = disTitle
+        # The distance to jobs
+        # jobs are string ended with ["er","or","st"]
+        # for example, cooker, director, analyst
+        # for example "Cooker Mr Elon Musk speaks to his Three Wive"
+        # "Mr Elon Musk" : 1
+        # "Elon Musk" : 2
+        self.disJob = disJob
 
 # read files from I
 # return text and labeled entity position
@@ -27,17 +71,16 @@ def readfile():
   labels = []
   positions = []
   # read files from I
-  for i in range(1, 60):
+  for i in range(startfile,endfile):
     file = str(i).zfill(3)
     f = open("../I/" + file + "l.txt", "r", encoding='utf-8-sig')
-    print("../I/" + file + "l.txt")
 
     # text is the sub strings of file splited by space
     # label is the position of name
     # for example, "Elon Musk has three wives"
     # text will be [Elon, Musk, has, three, wives]
     # label will be [1,1,-1,-1,-1] because text[0] = Elon and text[1] = Musk are both names
-    # position will be [0,1,2,3,4] 
+    # position will be [0,1,2,3,4]
     text = []
     label = []
     position = []
@@ -76,7 +119,7 @@ def generatecandiates(texts, labels, positions):
       pos.append(positions[k][i])
       pos.append(1)
       text = texts[k][i]
-      candidates.append(candidate(text, pos, labels[k][i], 1, 1))
+      candidates.append(candidate(text, pos, labels[k][i], 1, 1, 1, 1, 1, 1))
 
   #generate candidates of length 2
   for k in range(0,len(texts)):
@@ -87,20 +130,21 @@ def generatecandiates(texts, labels, positions):
       pos.append(positions[k][i])
       pos.append(2)
 
+      punctuation = [',','.','?','!',':','\'','\"','(',')',';']
       if labels[k][i] != -1 and labels[k][i+1] != -1:
         #this is a probable candidate name of length 2 words
-        if texts[k][i][-1:] == ',' :
+        if texts[k][i][-1:] in punctuation :
           # for strings like "Elon Musk, Mark Manson and Tom Sawyer are good friends.", candidates are generated as
           # Elon Musk, ; Musk, Mark and so on; so we need to avoid combining two names together like in Musk, Mark;
-          # if a comma is encountered in probable candidate generation that indicates one name ended and another name started, then that 
+          # if a comma is encountered in probable candidate generation that indicates one name ended and another name started, then that
           # is marked as not a name
-          label = -1 
+          label = -1
         else:
           label = labels[k][i]
       else:
         label = -1 #includes cases like "Musk has" or "said Elon" where one of the word is not a name and cases like "has three" where none of the word is a name
 
-      candidates.append(candidate(text, pos, label, 1, 1))
+      candidates.append(candidate(text, pos, label, 1, 1, 1, 1, 1, 1))
 
   #generate candidates of length 3
   for k in range(0,len(texts)):
@@ -113,26 +157,26 @@ def generatecandiates(texts, labels, positions):
 
       if labels[k][i] != -1 and labels[k][i+1] != -1 and labels[k][i+2] != -1:
         #this is a probable candidate name of length 3 words
-        if texts[k][i][-1:] == ',' or texts[k][i+1][-1:] == ',':
+        if texts[k][i][-1:] in punctuation or texts[k][i+1][-1:] in punctuation:
           # for strings like "Elon Musk, Mark Manson and Tom Sawyer are good friends.", candidates are generated as
           # Elon Musk, Mark ; Musk, Mark Manson and so on; so we need to avoid combining two names together
-          # if a comma is encountered in probable candidate generation that indicates one name ended and another name started, then that 
+          # if a comma is encountered in probable candidate generation that indicates one name ended and another name started, then that
           # is marked as not a name
-          label = -1 
+          label = -1
         else:
           label = labels[k][i]
       else:
-        # includes cases like 'Musk has three' or 'said Elon Musk' where one of the word is not a name 
+        # includes cases like 'Musk has three' or 'said Elon Musk' where one of the word is not a name
         # and cases like 'has three wives' where none of the word is a name
-        label = -1 
+        label = -1
 
-      candidates.append(candidate(text, pos, label, 1, 1))
+      candidates.append(candidate(text, pos, label, 1, 1, 1, 1, 1, 1))
 
   #candidates.append(candidate([0],1,1))
   #candidates.append(candidate([0],1,1))
   return candidates
 
-# TODO: preprocess all candidates (e.g. pruning rules)
+# preprocess all candidates (e.g. pruning rules)
 def preprocess(candidates):
 
   # PRUNING RULE 1: check if every word of candidate's text start with capital letter or not
@@ -152,13 +196,13 @@ def preprocess(candidates):
       continue
     prunedCandidatesStage1.append(candidates[i]);
 
-  # PRUNING RULE 2: Remove single word salutation candidates like Mr, Ms, Mrs and Dr
-  salut = ["Mr", "Ms", "Mrs", "Dr"]
+  # PRUNING RULE 2: Remove titles like Chairman, Executive, President, Minister
+  titles = ["Chairman", "Executive", "President", "Minister"]
   prunedCandidatesStage2 = []
   for i in range(0, len(prunedCandidatesStage1)):
     flag = 0
-    for j in range(0, len(salut)):
-      if(prunedCandidatesStage1[i].text == salut[j]):
+    for j in range(0, len(titles)):
+      if(prunedCandidatesStage1[i].text == titles[j]):
         flag = 1
         break
     if flag == 1:
@@ -168,7 +212,7 @@ def preprocess(candidates):
   # PRUNING RULE 3: Remove candidates that have prepositions and third person indirect references in them
   # Note : More can be discovered later, the following were occuring the most in the first 60 files
   prunedCandidatesStage3 = []
-  prep = ["The", "To", "I", "In", "On", "His", "Her", "He", "She", "They", "With", "It", "But", "As", "A", "This", "We"]
+  prep = ["The", "To", "I", "In", "On", "His", "Her", "He", "She", "They", "With", "It", "But", "As", "A", "This", "We", "However", "For"]
   for i in range(0, len(prunedCandidatesStage2)):
     words = []
     text = prunedCandidatesStage2[i].text
@@ -187,9 +231,134 @@ def preprocess(candidates):
 
   return prunedCandidatesStage3
 
-# TODO: generate features for candidates left after pre-processing
-def generateFeatures(candidates):
-  return 0
+# generate features for candidates left after pre-processing
+def generateFeatures(candidates, texts):
+  for candidate in candidates:
+    # first feature: length of candidate text
+    candidate.length = len(candidate.text)
+
+    # second feature: disTosalution
+    # The distance to previous salutions including ["Mr", "Ms", "Mrs", "Dr", "Miss", "Mx", "Sir"]
+    # distance is at most 5. Otherwise, distance is 999
+    # if the candidate text contain one of these titles, distance is zero
+    # for example "Mr Elon Musk has Three Wives, bla bla bla bla bla Time"
+    # "Mr Elon Musk" : 0
+    # "Elon Musk" : 1
+    # "Three" : 4
+    # "Time" : 999
+    words = []
+    sals = ["Mr", "Ms", "Mrs", "Dr", "Miss", "Mx", "Sir"]
+    text = candidate.text
+    words.extend(re.findall(r'\S+', text))
+    for word in words:
+        if word in sals:
+          candidate.disTosalution = 0
+    # if not included, check distance
+    if candidate.disTosalution != 0:
+      if (candidate.position[1] >= 1 and texts[candidate.position[0] - 1][candidate.position[1] - 1] in sals):
+        candidate.disTosalution = 1
+      elif (candidate.position[1] >= 2 and texts[candidate.position[0] - 1][candidate.position[1] - 2] in sals):
+        candidate.disTosalution = 2
+      elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3] in sals):
+        candidate.disTosalution = 3
+      elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4] in sals):
+        candidate.disTosalution = 4
+      elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5] in sals):
+        candidate.disTosalution = 5
+      else:
+        candidate.disTosalution = 999
+
+    # second feature: disTospeak
+    # The distance to speak actions including ["say","says","said","tell","tells","told","asks","asked","speak","speaks","spoken"]
+    # distance is at most 5. Otherwise, distance is 999
+    # if the candidate text contain one of these titles, distance is zero
+    # for example "Mr Elon Musk speaks to his Three Wives, bla bla bla bla bla Time"
+    # "Mr Elon Musk" : 1
+    # "Elon Musk" : 1
+    # "Three" : 3
+    # "Time" : 999
+    speaks = ["say","says","said","tell","tells","told","asks","asked","speak","speaks","spoken","Say","Says","Said","Tell","Tells","Told","Asks","Asked","Speak","Speaks","Spoken"]
+    for word in words:
+        if word in speaks:
+          candidate.disTospeak = 0
+    if candidate.disTospeak != 0:
+      if (candidate.position[1] >= 1 and texts[candidate.position[0] - 1][candidate.position[1] - 1] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 1 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2]] in speaks):
+        candidate.disTospeak = 1
+      elif (candidate.position[1] >= 2 and texts[candidate.position[0] - 1][candidate.position[1] - 2] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 2 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 1] in speaks):
+        candidate.disTospeak = 2
+      elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 3 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 2] in speaks):
+        candidate.disTospeak = 3
+      elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 4 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 3] in speaks):
+        candidate.disTospeak = 4
+      elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 5 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 4] in speaks):
+        candidate.disTospeak = 5
+      else:
+        candidate.disTospeak = 999
+
+    # Third feature: punctuation
+    # Whether there is a punctuation in the middle and at the end of substring
+    # true = 1 and false = -1
+    # for example "Elon Musk, Alex Fust speak to their wives"
+    # "Elon Musk," : -1
+    # "Musk, Alex" : 1
+    # "Musk, Alex Fust" : 1
+    punctuation = [',','.','?','!',':','\'','\"','(',')',';']
+    if(candidate.position[2] == 2 and words[0][-1:] in punctuation):
+      candidate.punctuation = 1
+    elif(candidate.position[2] == 3 and (words[0][-1:] in punctuation or words[1][-1:] in punctuation)):
+      candidate.punctuation = 1
+    else:
+      candidate.punctuation = -1
+
+    # forth feature: disTitle
+    # The distance to titles = ["Chairman", "Executive", "President", "Minister"]
+    # distance is at most 5. Otherwise, distance is 999
+    # for example "Chairman Mr Elon Musk speaks to his Three Wives"
+    # "Mr Elon Musk" : 1
+    # "Elon Musk" : 2
+    titles = ["Chairman", "Executive", "President", "Minister", "chairman", "executive", "president", "minister"]
+    for word in words:
+        if word in titles:
+          candidate.disTitle = -1
+    if candidate.disTitle != 0:
+      if (candidate.position[1] >= 1 and texts[candidate.position[0] - 1][candidate.position[1] - 1] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 1 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2]] in titles):
+        candidate.disTitle = 1
+      elif (candidate.position[1] >= 2 and texts[candidate.position[0] - 1][candidate.position[1] - 2] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 2 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 1] in titles):
+        candidate.disTitle = 2
+      elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 3 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 2] in titles):
+        candidate.disTitle = 3
+      elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 4 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 3] in titles):
+        candidate.disTitle = 4
+      elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 5 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 4] in titles):
+        candidate.disTitle = 5
+      else:
+        candidate.disTitle = 999
+
+    # The distance to jobs
+    # jobs are string ended with ["er","or","st"]
+    # for example, cooker, director, analyst
+    # for example "Cooker Mr Elon Musk speaks to his Three Wive"
+    # "Mr Elon Musk" : 1
+    # "Elon Musk" : 2
+    jobs = ["er","or","st"]
+    for word in words:
+      if word[-2:] in jobs:
+        candidate.disJob = -1
+    if candidate.disJob != 0:
+      if (candidate.position[1] >= 1 and texts[candidate.position[0] - 1][candidate.position[1] - 1][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 1 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2]][-2:] in jobs):
+        candidate.disJob = 1
+      elif (candidate.position[1] >= 2 and texts[candidate.position[0] - 1][candidate.position[1] - 2][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 2 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 1][-2:] in jobs):
+        candidate.disJob = 2
+      elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 3 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 2][-2:] in jobs):
+        candidate.disJob = 3
+      elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 4 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 3][-2:] in jobs):
+        candidate.disJob = 4
+      elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 5 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 4][-2:] in jobs):
+        candidate.disJob = 5
+      else:
+        candidate.disJob = 999
+
+  return candidates
 
 # TODO: postprocess all candidates
 def postprocess(candidates):
@@ -202,23 +371,24 @@ def evaluate(candidates):
 def main():
   # read files from I
   texts,labels,positions = readfile()
-  #print(texts)
-  #print(labels)
-  candidates = generatecandiates(texts, labels,positions)
-  f = open("candidatesGenerated.txt", "w")
+  # print(texts)
+  # print(positions)
+  candidates = generatecandiates(texts, labels, positions)
+  f = open("candidatesGenerated.txt", "w", encoding='utf-8-sig')
   for i in range(0,len(candidates)):
     f.write('{} {} {}\n'.format(candidates[i].text, candidates[i].position, candidates[i].label))
 
   candidates = preprocess(candidates)
-  f = open("candidatesPruned.txt", "w")
+  candidates = generateFeatures(candidates, texts)
+  f = open("candidatesPruned.txt", "w", encoding='utf-8-sig')
   count = 0
   for i in range(0,len(candidates)):
-    f.write('{} {} {}\n'.format(candidates[i].text, candidates[i].position, candidates[i].label))
+    f.write('{} {} {} {} {} {} {} {} {}\n'.format(candidates[i].text, candidates[i].position, candidates[i].label, candidates[i].length, candidates[i].disTosalution, candidates[i].disTospeak, candidates[i].punctuation, candidates[i].disTitle, candidates[i].disJob))
     if candidates[i].label != -1:
       count += 1
-  print(count); #count of candidates that are valid names
-  candidates = generateFeatures(candidates)
-  candidates = ml.traindata(candidates,labels)
+  # print(count); #count of candidates that are valid names
+  clf = ml.traindata(candidates,startfile,endfile)
+  # print(clf.predict([[2,10,0,1]]))
   candidates = postprocess(candidates)
   evaluate(candidates)
 
