@@ -4,7 +4,8 @@ import ml
 # startfile  =  2
 # endfile = 3
 startfile  =  1
-endfile = 200
+endfile = 201
+endtestfile = 301
 
 # candidate of all sub strings
 class candidate:
@@ -71,9 +72,9 @@ def readfile():
   labels = []
   positions = []
   # read files from I
-  for i in range(startfile,endfile):
+  for i in range(startfile,endtestfile):
     file = str(i).zfill(3)
-    f = open("../I/" + file + "l.txt", "r", encoding='utf-8-sig')
+    f = open("../documents/" + file + "l.txt", "r", encoding='utf-8-sig')
 
     # text is the sub strings of file splited by space
     # label is the position of name
@@ -121,56 +122,56 @@ def generatecandiates(texts, labels, positions):
       text = texts[k][i]
       candidates.append(candidate(text, pos, labels[k][i], 1, 1, 1, 1, 1, 1))
 
-  #generate candidates of length 2
-  for k in range(0,len(texts)):
-    for i in range(0,len(texts[k]) - 1):
-      text = texts[k][i] + " " + texts[k][i+1]
-      pos = []
-      pos.append(k+1)
-      pos.append(positions[k][i])
-      pos.append(2)
-
-      punctuation = [',','.','?','!',':','\'','\"','(',')',';']
-      if labels[k][i] != -1 and labels[k][i+1] != -1:
-        #this is a probable candidate name of length 2 words
-        if texts[k][i][-1:] in punctuation :
-          # for strings like "Elon Musk, Mark Manson and Tom Sawyer are good friends.", candidates are generated as
-          # Elon Musk, ; Musk, Mark and so on; so we need to avoid combining two names together like in Musk, Mark;
-          # if a comma is encountered in probable candidate generation that indicates one name ended and another name started, then that
-          # is marked as not a name
-          label = -1
-        else:
-          label = labels[k][i]
-      else:
-        label = -1 #includes cases like "Musk has" or "said Elon" where one of the word is not a name and cases like "has three" where none of the word is a name
-
-      candidates.append(candidate(text, pos, label, 1, 1, 1, 1, 1, 1))
-
-  #generate candidates of length 3
-  for k in range(0,len(texts)):
-    for i in range(0,len(texts[k]) - 2):
-      text = texts[k][i] + " " + texts[k][i+1] + " " + texts[k][i+2]
-      pos = []
-      pos.append(k+1)
-      pos.append(positions[k][i])
-      pos.append(3)
-
-      if labels[k][i] != -1 and labels[k][i+1] != -1 and labels[k][i+2] != -1:
-        #this is a probable candidate name of length 3 words
-        if texts[k][i][-1:] in punctuation or texts[k][i+1][-1:] in punctuation:
-          # for strings like "Elon Musk, Mark Manson and Tom Sawyer are good friends.", candidates are generated as
-          # Elon Musk, Mark ; Musk, Mark Manson and so on; so we need to avoid combining two names together
-          # if a comma is encountered in probable candidate generation that indicates one name ended and another name started, then that
-          # is marked as not a name
-          label = -1
-        else:
-          label = labels[k][i]
-      else:
-        # includes cases like 'Musk has three' or 'said Elon Musk' where one of the word is not a name
-        # and cases like 'has three wives' where none of the word is a name
-        label = -1
-
-      candidates.append(candidate(text, pos, label, 1, 1, 1, 1, 1, 1))
+  # #generate candidates of length 2
+  # for k in range(0,len(texts)):
+  #   for i in range(0,len(texts[k]) - 1):
+  #     text = texts[k][i] + " " + texts[k][i+1]
+  #     pos = []
+  #     pos.append(k+1)
+  #     pos.append(positions[k][i])
+  #     pos.append(2)
+  #
+  #     punctuation = [',','.','?','!',':','\'','\"','(',')',';']
+  #     if labels[k][i] != -1 and labels[k][i+1] != -1:
+  #       #this is a probable candidate name of length 2 words
+  #       if texts[k][i][-1:] in punctuation :
+  #         # for strings like "Elon Musk, Mark Manson and Tom Sawyer are good friends.", candidates are generated as
+  #         # Elon Musk, ; Musk, Mark and so on; so we need to avoid combining two names together like in Musk, Mark;
+  #         # if a comma is encountered in probable candidate generation that indicates one name ended and another name started, then that
+  #         # is marked as not a name
+  #         label = -1
+  #       else:
+  #         label = labels[k][i]
+  #     else:
+  #       label = -1 #includes cases like "Musk has" or "said Elon" where one of the word is not a name and cases like "has three" where none of the word is a name
+  #
+  #     candidates.append(candidate(text, pos, label, 1, 1, 1, 1, 1, 1))
+  #
+  # #generate candidates of length 3
+  # for k in range(0,len(texts)):
+  #   for i in range(0,len(texts[k]) - 2):
+  #     text = texts[k][i] + " " + texts[k][i+1] + " " + texts[k][i+2]
+  #     pos = []
+  #     pos.append(k+1)
+  #     pos.append(positions[k][i])
+  #     pos.append(3)
+  #
+  #     if labels[k][i] != -1 and labels[k][i+1] != -1 and labels[k][i+2] != -1:
+  #       #this is a probable candidate name of length 3 words
+  #       if texts[k][i][-1:] in punctuation or texts[k][i+1][-1:] in punctuation:
+  #         # for strings like "Elon Musk, Mark Manson and Tom Sawyer are good friends.", candidates are generated as
+  #         # Elon Musk, Mark ; Musk, Mark Manson and so on; so we need to avoid combining two names together
+  #         # if a comma is encountered in probable candidate generation that indicates one name ended and another name started, then that
+  #         # is marked as not a name
+  #         label = -1
+  #       else:
+  #         label = labels[k][i]
+  #     else:
+  #       # includes cases like 'Musk has three' or 'said Elon Musk' where one of the word is not a name
+  #       # and cases like 'has three wives' where none of the word is a name
+  #       label = -1
+  #
+  #     candidates.append(candidate(text, pos, label, 1, 1, 1, 1, 1, 1))
 
   #candidates.append(candidate([0],1,1))
   #candidates.append(candidate([0],1,1))
@@ -197,7 +198,7 @@ def preprocess(candidates):
     prunedCandidatesStage1.append(candidates[i]);
 
   # PRUNING RULE 2: Remove titles like Chairman, Executive, President, Minister
-  titles = ["Chairman", "Executive", "President", "Minister"]
+  titles = ["Chairman", "Executive", "President", "Minister","Chief","Boss","Spokesman","Secretary","General","Judge"]
   prunedCandidatesStage2 = []
   for i in range(0, len(prunedCandidatesStage1)):
     flag = 0
@@ -212,19 +213,17 @@ def preprocess(candidates):
   # PRUNING RULE 3: Remove candidates that have prepositions and third person indirect references in them
   # Note : More can be discovered later, the following were occuring the most in the first 60 files
   prunedCandidatesStage3 = []
-  prep = ["The", "To", "I", "In", "On", "His", "Her", "He", "She", "They", "With", "It", "But", "As", "A", "This", "We", "However", "For"]
+  prep = ["The","To","I","In","On","His","Her","He","She","They","With","It","But","As","A","This","We","However","For","Before","After","Although","Vice","Former","Prime","Treasury","Under"]
+  country = ["America", "American", "Africa","African","United States", "German","Germany","India","Indian","Britain","British","China","Chinese","Korean", "Japan", "Japanese", "Russia","Russian","Swiss"]
   for i in range(0, len(prunedCandidatesStage2)):
     words = []
     text = prunedCandidatesStage2[i].text
     words.extend(re.findall(r'\S+', text))
     flag = 0
     for idx, val in enumerate(words):
-      for j in range(0, len(prep)):
-        if val == prep[j]:
+      if val in prep or val in country:
           flag = 1
           break
-      if flag == 1:
-        break
     if flag == 1:
         continue
     prunedCandidatesStage3.append(prunedCandidatesStage2[i]);
@@ -259,12 +258,12 @@ def generateFeatures(candidates, texts):
         candidate.disTosalution = 1
       elif (candidate.position[1] >= 2 and texts[candidate.position[0] - 1][candidate.position[1] - 2] in sals):
         candidate.disTosalution = 2
-      elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3] in sals):
-        candidate.disTosalution = 3
-      elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4] in sals):
-        candidate.disTosalution = 4
-      elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5] in sals):
-        candidate.disTosalution = 5
+      # elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3] in sals):
+      #   candidate.disTosalution = 3
+      # elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4] in sals):
+      #   candidate.disTosalution = 4
+      # elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5] in sals):
+      #   candidate.disTosalution = 5
       else:
         candidate.disTosalution = 999
 
@@ -277,7 +276,7 @@ def generateFeatures(candidates, texts):
     # "Elon Musk" : 1
     # "Three" : 3
     # "Time" : 999
-    speaks = ["say","says","said","tell","tells","told","asks","asked","speak","speaks","spoken","Say","Says","Said","Tell","Tells","Told","Asks","Asked","Speak","Speaks","Spoken"]
+    speaks = ["say","says","said","tell","tells","told","asks","asked","speak","speaks","spoken","explain","explains","explained","Say","Says","Said","Tell","Tells","Told","Asks","Asked","Speak","Speaks","Spoken","Explain","Explains","Explained"]
     for word in words:
         if word in speaks:
           candidate.disTospeak = 0
@@ -286,12 +285,12 @@ def generateFeatures(candidates, texts):
         candidate.disTospeak = 1
       elif (candidate.position[1] >= 2 and texts[candidate.position[0] - 1][candidate.position[1] - 2] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 2 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 1] in speaks):
         candidate.disTospeak = 2
-      elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 3 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 2] in speaks):
-        candidate.disTospeak = 3
-      elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 4 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 3] in speaks):
-        candidate.disTospeak = 4
-      elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 5 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 4] in speaks):
-        candidate.disTospeak = 5
+      # elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 3 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 2] in speaks):
+      #   candidate.disTospeak = 3
+      # elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 4 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 3] in speaks):
+      #   candidate.disTospeak = 4
+      # elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5] in speaks) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 5 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 4] in speaks):
+      #   candidate.disTospeak = 5
       else:
         candidate.disTospeak = 999
 
@@ -316,7 +315,7 @@ def generateFeatures(candidates, texts):
     # for example "Chairman Mr Elon Musk speaks to his Three Wives"
     # "Mr Elon Musk" : 1
     # "Elon Musk" : 2
-    titles = ["Chairman", "Executive", "President", "Minister", "chairman", "executive", "president", "minister"]
+    titles = ["Chairman", "Executive", "President", "Minister","Chief","Boss","Spokesman","Secretary","General","Judge","chairman", "executive", "president", "minister","chief","boss","spokesman","secretary","general","judge"]
     for word in words:
         if word in titles:
           candidate.disTitle = -1
@@ -325,12 +324,12 @@ def generateFeatures(candidates, texts):
         candidate.disTitle = 1
       elif (candidate.position[1] >= 2 and texts[candidate.position[0] - 1][candidate.position[1] - 2] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 2 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 1] in titles):
         candidate.disTitle = 2
-      elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 3 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 2] in titles):
-        candidate.disTitle = 3
-      elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 4 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 3] in titles):
-        candidate.disTitle = 4
-      elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 5 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 4] in titles):
-        candidate.disTitle = 5
+      # elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 3 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 2] in titles):
+      #   candidate.disTitle = 3
+      # elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 4 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 3] in titles):
+      #   candidate.disTitle = 4
+      # elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5] in titles) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 5 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 4] in titles):
+      #   candidate.disTitle = 5
       else:
         candidate.disTitle = 999
 
@@ -349,12 +348,12 @@ def generateFeatures(candidates, texts):
         candidate.disJob = 1
       elif (candidate.position[1] >= 2 and texts[candidate.position[0] - 1][candidate.position[1] - 2][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 2 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 1][-2:] in jobs):
         candidate.disJob = 2
-      elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 3 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 2][-2:] in jobs):
-        candidate.disJob = 3
-      elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 4 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 3][-2:] in jobs):
-        candidate.disJob = 4
-      elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 5 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 4][-2:] in jobs):
-        candidate.disJob = 5
+      # elif (candidate.position[1] >= 3 and texts[candidate.position[0] - 1][candidate.position[1] - 3][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 3 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 2][-2:] in jobs):
+      #   candidate.disJob = 3
+      # elif (candidate.position[1] >= 4 and texts[candidate.position[0] - 1][candidate.position[1] - 4][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 4 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 3][-2:] in jobs):
+      #   candidate.disJob = 4
+      # elif (candidate.position[1] >= 5 and texts[candidate.position[0] - 1][candidate.position[1] - 5][-2:] in jobs) or (candidate.position[1] + candidate.position[2] <= len(texts[candidate.position[0] - 1]) - 5 and texts[candidate.position[0] - 1][candidate.position[1] + candidate.position[2] + 4][-2:] in jobs):
+      #   candidate.disJob = 5
       else:
         candidate.disJob = 999
 
@@ -382,15 +381,24 @@ def main():
   candidates = generateFeatures(candidates, texts)
   f = open("candidatesPruned.txt", "w", encoding='utf-8-sig')
   count = 0
+  Icount = 0
+  Jcount = 0
   for i in range(0,len(candidates)):
     f.write('{} {} {} {} {} {} {} {} {}\n'.format(candidates[i].text, candidates[i].position, candidates[i].label, candidates[i].length, candidates[i].disTosalution, candidates[i].disTospeak, candidates[i].punctuation, candidates[i].disTitle, candidates[i].disJob))
     if candidates[i].label != -1:
       count += 1
-  # print(count); #count of candidates that are valid names
-  clf = ml.traindata(candidates,startfile,endfile)
+    if candidates[i].position[0] in range(startfile,endfile) and candidates[i].label != -1:
+      Icount += 1
+    if candidates[i].position[0] in range(endfile,endtestfile) and candidates[i].label != -1:
+      Jcount += 1
+
+  print("total number of mentions: ", count); #count of candidates that are valid names
+  print("total number of mentions in I: ", Icount);
+  print("total number of mentions in J: ", Jcount); 
+  ml.traindata(candidates,startfile,endfile,endtestfile)
   # print(clf.predict([[2,10,0,1]]))
-  candidates = postprocess(candidates)
-  evaluate(candidates)
+  # candidates = postprocess(candidates)
+  #ml.evaluate(candidates)
 
 
 if __name__== "__main__":
