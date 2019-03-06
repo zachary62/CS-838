@@ -14,27 +14,15 @@ CONG GU (cgu38@wisc.edu)
 
 - link to a directory that stores the 300+ documents. 
 
-  https://github.com/zachary62/CS-838/tree/master/Project1/documents
-
 - link to a browsable directory that stores all documents in set I.
-
-  https://github.com/zachary62/CS-838/tree/master/Project1/I
 
 - link to a browsable directory that stores all documents in set J.
 
-  https://github.com/zachary62/CS-838/tree/master/Project1/J
-
 - link to a directory that stores all of your code.
-
-  https://github.com/zachary62/CS-838/tree/master/Project1/src
 
 - link to a compressed file that stores all of the above directories. 
 
-  https://github.com/zachary62/CS-838/blob/master/Project1/Project1.zip
-  
 - link to a pdf document.
-
-  https://github.com/zachary62/CS-838/blob/master/Project1/report1.pdf
 
 ## Project 2: Crawling and extracting structured data from Web pages.
 
