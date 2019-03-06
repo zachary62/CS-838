@@ -6,11 +6,10 @@ import ml
 startfile  =  1
 endfile = 201
 endtestfile = 301
-common_names = []
 
 # candidate of all sub strings
 class candidate:
-    def __init__(self, text, position, label, length, disTosalution, disTospeak, punctuation, disTitle, disJob, nameScore):
+    def __init__(self, text, position, label, length, disTosalution, disTospeak, punctuation, disTitle, disJob):
         self.text = text
         # position is a tuple of length 3 whose first element tells the file number in which the candidate is present
         # second element tells the location of first word of the candidate and third element tells the no of words in the candidate
@@ -64,11 +63,6 @@ class candidate:
         # "Mr Elon Musk" : 1
         # "Elon Musk" : 2
         self.disJob = disJob
-        # Scoring function for checking how many words belong to common names / length of candidate
-        # +1 for every word that is in dictionary, 0 for every word not in dictionary
-        # 'Elon Musk': 2/2
-        # 'Elon says': 1/2
-        self.nameScore = nameScore
 
 # read files from I
 # return text and labeled entity position
@@ -109,14 +103,6 @@ def readfile():
 
   return texts,labels,positions
 
-
-def load_common_names():
-  global common_names
-  names_txt = open("names.txt", 'r')
-  for name in names_txt:
-    common_names.append(name[:-1])
-
-
 # return all candidates of given text
 # for example, "Elon Musk has three wives"
 # return features of  "Elon, Musk, has, three, wives,
@@ -134,7 +120,7 @@ def generatecandiates(texts, labels, positions):
       pos.append(positions[k][i])
       pos.append(1)
       text = texts[k][i]
-      candidates.append(candidate(text, pos, labels[k][i], 1, 1, 1, 1, 1, 1, 0.0))
+      candidates.append(candidate(text, pos, labels[k][i], 1, 1, 1, 1, 1, 1))
 
   # #generate candidates of length 2
   # for k in range(0,len(texts)):
@@ -371,12 +357,6 @@ def generateFeatures(candidates, texts):
       else:
         candidate.disJob = 999
 
-      # Scoring of candidate based on whether it's in common name dictionary
-      for word in words:
-        if word in common_names:
-          candidate.nameScore += 1
-      candidate.nameScore = candidate.nameScore * 1.0 / len(words)
-
   return candidates
 
 # TODO: postprocess all candidates
@@ -390,7 +370,6 @@ def evaluate(candidates):
 def main():
   # read files from I
   texts,labels,positions = readfile()
-  load_common_names()
   # print(texts)
   # print(positions)
   candidates = generatecandiates(texts, labels, positions)

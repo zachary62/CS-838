@@ -20,7 +20,7 @@ def traindata(candidates,startfile,endfile,endtestfile):
     clf.append(RandomForestClassifier(n_estimators=100, max_depth=2,random_state=0))
     clf.append(svm.SVC(gamma='scale'))
     clf.append(linear_model.LinearRegression())
-    clf.append(LogisticRegression(random_state=0, solver='lbfgs',multi_class='multinomial', max_iter=500))
+    clf.append(LogisticRegression(random_state=0, solver='lbfgs',multi_class='multinomial'))
 
     # performance = recall + precision
     performance = []
@@ -96,7 +96,7 @@ def dividecandidates(candidates,startfile,endfile,endtestfile):
         for i in range(6):
             if(candidate.position[0] in sets[i]):
                 Xm[i].append([candidate.text, candidate.position[0],candidate.position[1]])
-                Xs[i].append([candidate.position[2], candidate.length, candidate.disTosalution, candidate.disTospeak, candidate.punctuation, candidate.disTitle, candidate.disJob, candidate.nameScore])
+                Xs[i].append([candidate.position[2], candidate.length, candidate.disTosalution, candidate.disTospeak, candidate.punctuation, candidate.disTitle, candidate.disJob])
                 Ys[i].append(candidate.label)
                 break
     return Xm,Xs, Ys
