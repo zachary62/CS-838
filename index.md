@@ -38,7 +38,18 @@ CONG GU (cgu38@wisc.edu)
 
 ## Project 2: Crawling and extracting structured data from Web pages.
 
+- Provide a link to a DATA directory that stores both tables A and B. 
 
+  https://github.com/zachary62/CS-838/tree/master/Project2/data
+  
+- Provide a link to a CODE directory that stores all of your code.  
+
+  https://github.com/zachary62/CS-838/tree/master/Project2/src
+  
+- Provide a link to a pdf file 
+
+  https://github.com/zachary62/CS-838/blob/master/Project2/report2.pdf
+  
 ## Project 3: Entity matching.
 
 
