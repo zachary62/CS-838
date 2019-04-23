@@ -52,7 +52,14 @@ CONG GU (cgu38@wisc.edu)
   
 ## Project 3: Entity matching.
 
+-  the user ID that you used to log into the CloudMatcher cluster. 
+    
+   groupten
+    
+-  the project ID that you used to create a project in which you matched the two tables Fodors and Zagats. 
 
-## Project 4: integrating and performing analysis.
+   trialmatch
+    
+-  a screenshot of the very last screen after you are done with the matches. Here is an example of such a screen. 
 
-
+   https://github.com/zachary62/CS-838/blob/master/Project3/screenshot.png
