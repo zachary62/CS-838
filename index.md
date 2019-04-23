@@ -52,14 +52,44 @@ CONG GU (cgu38@wisc.edu)
   
 ## Project 3: Entity matching.
 
--  the user ID that you used to log into the CloudMatcher cluster. 
-    
-   groupten
-    
--  the project ID that you used to create a project in which you matched the two tables Fodors and Zagats. 
+- Matching Fodors and Zagats
 
-   trialmatch
+  -  the user ID that you used to log into the CloudMatcher cluster. 
     
--  a screenshot of the very last screen after you are done with the matches. Here is an example of such a screen. 
+     groupten
 
-   https://github.com/zachary62/CS-838/blob/master/Project3/screenshot.png
+  -  the project ID that you used to create a project in which you matched the two tables Fodors and Zagats. 
+
+     trialrun
+
+  -  a screenshot of the very last screen after you are done with the matches. Here is an example of such a screen. 
+
+     https://github.com/zachary62/CS-838/blob/master/Project3/screenshot.png
+     
+- Blocking Results
+
+  - the user ID that you used to log into CloudMatcher
+  
+    groupten
+
+  - the project ID that you used to create a project in which you blocked and matched the two tables A and B
+  
+    bookmatch
+
+  - a screen shot of the top ten blocking rules that CloudMatcher has learned
+  
+    https://github.com/zachary62/CS-838/blob/master/Project3/blocking2.png
+
+- Matching Results
+
+  - the user ID that you used to log into CloudMatcher
+  
+    groupten
+
+  - the project ID that you used to create a project in which you blocked and matched the two tables A and B
+  
+    bookmatch
+
+  - a screen shot of of the very last screen after you are done with the matches
+  
+    https://github.com/zachary62/CS-838/blob/master/Project3/matching.png
