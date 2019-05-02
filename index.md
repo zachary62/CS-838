@@ -93,3 +93,41 @@ CONG GU (cgu38@wisc.edu)
   - a screen shot of of the very last screen after you are done with the matches
   
     https://github.com/zachary62/CS-838/blob/master/Project3/matching.png
+    
+- Estimating accuracy
+
+  - Provide a link to the files "Prediction list", "Candidate set", "Table A", and "Table B" that you have downloaded from CloudMatcher. 
+  
+    Prediction list: https://github.com/zachary62/CS-838/blob/master/Project3/prediction.xls
+    
+    Table A: https://github.com/zachary62/CS-838/blob/master/Project3/tableA.xls
+    
+    Table B: https://github.com/zachary62/CS-838/blob/master/Project3/tableB.xls
+    
+    Candidate set is too large (more than 100 MB) to be uploaded
+    
+  - List the size of the candidate set C.
+   
+   1398101
+  
+  - Provide a pdf file that discusses each iteration of computing density of the matches and using new blocking rules to reduce the candidate set size. 
+  
+    https://github.com/zachary62/CS-838/blob/master/Project3/block.pdf
+
+  - provide link to where your blocking code is. 
+  
+    https://github.com/zachary62/CS-838/blob/master/Project3/block.py
+       
+  - provide link to the final reduced set of candidate tuple pairs. 
+  
+    https://github.com/zachary62/CS-838/blob/master/Project3/candidateafterblock.csv
+        
+  - provide link to the set of 400 tuple pairs that you have sampled and manually labeled. 
+      
+    https://github.com/zachary62/CS-838/blob/master/Project3/label.csv
+     
+  - list the precision and recall you have obtained using the above 400 tuple pairs and the Jupyter notebook. 
+  
+    Precision: [0.6838887462607022, 0.9388903151707551]
+    
+    Recall： [0.4638214136742231, 0.9338797357510644]
