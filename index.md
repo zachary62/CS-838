@@ -108,7 +108,7 @@ CONG GU (cgu38@wisc.edu)
     
   - List the size of the candidate set C.
    
-   1398101
+    1398101
   
   - Provide a pdf file that discusses each iteration of computing density of the matches and using new blocking rules to reduce the candidate set size. 
   
